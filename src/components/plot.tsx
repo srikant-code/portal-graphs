@@ -55,12 +55,16 @@ const graphsLayout = (datax: any, datay: any) => {
             font: {
                 family: "ubuntu",
                 size: 12,
-                color: "#292b31",
+                color: "#fff",
             },
             bgcolor: "#292b31",
             bordercolor: "#292b31",
             borderwidth: 0,
         },
+        dragmode: "zoom",
+        separators: ".,",
+        // width: null,
+        // height: null,
     };
 };
 
@@ -93,7 +97,7 @@ const graphsConfig = (filename: any) => {
 export const PlotBoxGraph = (props: any) => {
     return (
         <Plot
-            data={[props.plotdata[0]]}
+            data={[...props.plotdata]}
             layout={{ ...(graphsLayout(props.title, "Range") as object) }}
             style={{ ...(graphsStyles() as object) }}
             config={{ ...(graphsConfig(props.title + "Plot") as object) }}
@@ -110,6 +114,11 @@ export const PlotLineGraph = (props: any) => {
                     type: "scatter",
                     mode: "lines+markers",
                     marker: { color: "#ab63fa" },
+                    line: {
+                        shape: "spline",
+                        smoothing: 1,
+                        dash: "dot",
+                    }
                 },
             ]}
             layout={{ ...(graphsLayout(props.x.title, props.y.title) as object) }}

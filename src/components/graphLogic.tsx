@@ -1,4 +1,3 @@
-// @ts-ignore
 import React, { useEffect } from "react";
 import { PlotLineGraph, PlotBoxGraph } from "./plot";
 
@@ -15,21 +14,23 @@ const Graph: React.FC = () => {
     latencyVals: [] as any,
 
     boxPlotData: [] as any,
-    iopplots: [] as any,
+    iopPlots: [] as any,
+    clatSlatLatPlots: [] as any,
   });
 
-  const generateObjForMinMax = (
+  const generateObjForMinMaxMean = (
     min: number,
     max: number,
     mean: number,
+    color: string,
     name: string
   ) => {
     return {
       y: [min, max, mean],
       name: name,
-      boxpoints: false,
+      boxpoints: true,
       marker: {
-        color: "rgb(137, 32, 223)",
+        color: color,
       },
       line: {
         width: 1,
@@ -59,24 +60,54 @@ const Graph: React.FC = () => {
     let latencyval = Object.values(latencyObj[0]);
     // .filter(el => el !== 0)
 
+    let latencykeys = Object.keys(latencyObj[0])
+    // Code for resolving infinity issue
+    latencykeys[latencykeys.length - 1] = latencykeys[latencykeys.length - 1].replace("=", '').replace(">", '').replace("<", '')
+    latencykeys[latencykeys.length - 1] = (parseInt(latencykeys[latencykeys.length - 1]) + 1).toString()
+
     let writeObj = res.jobs.map((job: { write: any }) => job.write as any);
     let boxPlot = [
-      // (generateObjForMinMax(writeObj[0].slat_ns.min, writeObj[0].slat_ns.max, writeObj[0].slat_ns.mean, "slat nsec")),
-      generateObjForMinMax(
+      generateObjForMinMaxMean(
         writeObj[0].bw_min as number,
         writeObj[0].bw_max as number,
         writeObj[0].bw_mean as number,
-        "Bandwidth"
+        "rgb(137, 32, 223)",
+        "Bandwidth",
       ),
     ];
     let iopplot = [
-      generateObjForMinMax(
+      generateObjForMinMaxMean(
         writeObj[0].iops_min as number,
         writeObj[0].iops_max as number,
         writeObj[0].iops_mean as number,
-        "IOPs"
+        "rgb(137, 32, 223)",
+        "IOPs",
       ),
     ];
+    let clatSlatLatplot = [
+      generateObjForMinMaxMean(
+        (writeObj[0].clat_ns.min as number) * 0.000000001,
+        writeObj[0].clat_ns.max as number * 0.000000001,
+        writeObj[0].clat_ns.mean as number * 0.000000001,
+        "rgb(223, 32, 190)",
+        "Clat in Nanosecond",
+      ),
+      generateObjForMinMaxMean(
+        writeObj[0].slat_ns.min as number * 0.000000001,
+        writeObj[0].slat_ns.max as number * 0.000000001,
+        writeObj[0].slat_ns.mean as number * 0.000000001,
+        "rgb(137, 32, 223)",
+        "Slat in Nanosecond",
+      ),
+      generateObjForMinMaxMean(
+        writeObj[0].lat_ns.min as number * 0.000000001,
+        writeObj[0].lat_ns.max as number * 0.000000001,
+        writeObj[0].lat_ns.mean as number * 0.000000001,
+        "rgb(32, 85, 223)",
+        "Lat in Nanosecond",
+      ),
+    ];
+    console.log(clatSlatLatplot.length, clatSlatLatplot)
     setData({
       percentileKeys: Object.keys(percentileObj[0]),
       percentileVals: clat_ns_val,
@@ -84,19 +115,20 @@ const Graph: React.FC = () => {
       iodepthKeys: Object.keys(iodepthObj[0]),
       iodepthVals: iodepthval,
 
-      latencyKeys: Object.keys(latencyObj[0]),
+      latencyKeys: latencykeys,
       latencyVals: latencyval,
 
       boxPlotData: boxPlot,
-      iopplots: iopplot,
+      iopPlots: iopplot,
+      clatSlatLatPlots: clatSlatLatplot,
       jobs: res.jobs,
     });
   };
 
   const fetchdata = () => {
-    const url =
+    const endpoint =
       "https://raw.githubusercontent.com/louwrentius/fio-plot-data/master/benchmark_data/HPMICROSERVERG10/SATA_AHCI_HGST_HTS72101_100GB_7K2RPM/randwrite-32-16.json";
-    fetch(url)
+    fetch(endpoint)
       .then((res) => res.json())
       .then((res) => processdata(res));
   };
@@ -116,23 +148,25 @@ const Graph: React.FC = () => {
       }}>
       {/* Clat ns Plot */}
       <PlotLineGraph
-        x={{ value: data.percentileKeys as any, title: "Percentiles" }}
-        y={{ value: data.percentileVals as any, title: "Clat in seconds" }}
+        x={{ value: data.percentileVals as any, title: "Clat in seconds" }}
+        y={{ value: data.percentileKeys as any, title: "Percentiles" }}
       />
       {/* iodepth Plot */}
       <PlotLineGraph
         x={{ value: data.iodepthKeys as any, title: "IO Depth" }}
         y={{ value: data.iodepthVals as any, title: "Depth Percentile %" }}
       />
+      {/* Clat, Slat, Lat Plot */}
+      <PlotBoxGraph plotdata={data.clatSlatLatPlots} title="Min, Max, Mean of Clat, Slat, Lat" />
+      {/* Latency Plot */}
       <PlotLineGraph
         x={{ value: data.latencyKeys as any, title: "Latency in millisecond" }}
         y={{ value: data.latencyVals as any, title: "Latency Percentile %" }}
       />
-      <PlotBoxGraph
-        plotdata={data.boxPlotData}
-        title="Min, Max, Mean of Bandwidth"
-      />
-      <PlotBoxGraph plotdata={data.iopplots} title="Min, Max, Mean of IOPs" />
+      {/* IOPs Plot */}
+      <PlotBoxGraph plotdata={data.iopPlots} title="Min, Max, Mean of IOPs" />
+      {/* Bandwidth Plot */}
+      <PlotBoxGraph plotdata={data.boxPlotData} title="Min, Max, Mean of Bandwidth" />
     </div>
   );
 };

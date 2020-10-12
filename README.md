@@ -1,3 +1,20 @@
+# FIO Ploty Graphs
+
+This project is containing the graphs of FIO JSON.
+
+![FIOPlotlyGraphs](https://user-images.githubusercontent.com/46858011/95719003-db5a1200-0c8c-11eb-8abf-ebb21927bdcb.png)
+
+The graphs are made using Plotly.js and this is where you can find the [raw JSON](https://raw.githubusercontent.com/louwrentius/fio-plot-data/master/benchmark_data/HPMICROSERVERG10/SATA_AHCI_HGST_HTS72101_100GB_7K2RPM/randwrite-32-16.json)
+
+## Custom Components
+
+- `<PlotBoxGraph />`
+- `<PlotLineGraph />`
+
+Reference Image for usage.
+
+![image](https://user-images.githubusercontent.com/46858011/95719576-a69a8a80-0c8d-11eb-82b4-1432024a8bdd.png)
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
