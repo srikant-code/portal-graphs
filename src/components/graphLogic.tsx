@@ -107,7 +107,7 @@ const Graph: React.FC = () => {
         "Lat in Nanosecond",
       ),
     ];
-    console.log(clatSlatLatplot.length, clatSlatLatplot)
+
     setData({
       percentileKeys: Object.keys(percentileObj[0]),
       percentileVals: clat_ns_val,
